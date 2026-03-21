@@ -1,0 +1,23 @@
+service: ecomrtx-ai-backend
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  environment:
+    DATABASE_URL: ${env:DATABASE_URL, ''}
+    GEMINI_API_KEY: ${env:GEMINI_API_KEY, ''}
+
+functions:
+  api:
+    handler: dist/serverless.handler
+    events:
+      - http:
+          method: ANY
+          path: /
+      - http:
+          method: ANY
+          path: '{proxy+}'
+
+plugins:
+  - serverless-offline

@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  plan      String    @default("FREE")
+  credits   Int       @default(0)
+  sessions  Session[]
+  ledgers   CreditLedger[]
+  logs      ActivityLog[]
+}
+
+model CreditLedger {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Int
+  type      String   // DEBIT or CREDIT
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Session {
+  token     String   @id
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  eventType String
+  userId    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
