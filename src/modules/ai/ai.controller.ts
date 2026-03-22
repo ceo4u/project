@@ -15,13 +15,12 @@ export class AiController {
       throw new BadRequestException('Image or text prompt required');
     }
 
-    // Process image base64 if it has a prefix
     let base64Data = body.image;
     if (base64Data && base64Data.includes(',')) {
       base64Data = base64Data.split(',')[1];
     }
 
-    const listing = await this.aiService.analyzeImage(
+    const { listing: fullListing, credits_remaining } = await this.aiService.analyzeImage(
       base64Data,
       body.mimeType || 'image/jpeg',
       req.user.id,
@@ -29,10 +28,43 @@ export class AiController {
       body.textPrompt
     );
 
+    // HSN/GST derivation logic
+    const deriveHSN = (category: string) => {
+      const map: Record<string, string> = {
+        'bags': '420292', 'backpack': '420292',
+        'clothing': '620000', 'kids': '611120',
+        'jewelry': '711719', 'footwear': '640299',
+        'toys': '950300', 'home': '630000'
+      };
+      const key = Object.keys(map).find(k => category?.toLowerCase().includes(k));
+      return key ? map[key] : '420292';
+    };
+
+    const deriveGST = (category: string) => {
+      const gstMap: Record<string, number> = {
+        'bags': 12, 'clothing': 5, 'jewelry': 3,
+        'footwear': 12, 'toys': 12, 'home': 12
+      };
+      const key = Object.keys(gstMap).find(k => category?.toLowerCase().includes(k));
+      return key ? gstMap[key] : 12;
+    };
+
+    // Return the specific shape expected by the extension
     return {
       success: true,
-      listing,
-      credits_remaining: req.user.credits - 1
+      listing: {
+        title: fullListing.title,
+        category: fullListing.category,
+        hsn: fullListing.hsn || deriveHSN(fullListing.category),
+        gst: fullListing.gst || deriveGST(fullListing.category),
+        sku: fullListing.sku,
+        weight: parseInt(fullListing.shipping?.weight) || 350,
+        price: fullListing.pricing?.selling_price,
+        mrp: fullListing.pricing?.mrp,
+        defective_price: fullListing.pricing?.defective_price,
+        full_listing: fullListing
+      },
+      credits_remaining
     };
   }
 }
