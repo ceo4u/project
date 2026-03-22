@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
 datasource db {
@@ -8,36 +9,209 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  plan      String    @default("FREE")
-  credits   Int       @default(0)
-  sessions  Session[]
-  ledgers   CreditLedger[]
-  logs      ActivityLog[]
+  id              String             @id @default(cuid())
+  firebaseUid     String             @unique
+  email           String             @unique
+  name            String?
+  phoneNumber     String?
+  avatarUrl       String?
+  role            Role               @default(FREE)
+  isOnboarded     Boolean            @default(false)
+  signupIp        String?
+  hasClaimedBonus Boolean            @default(false)
+  credits         CreditLedger[]
+  jobs            Job[]
+  payments        Payment[]
+  productProfiles ProductProfile[]
+  extensionSessions ExtensionSession[]
+  subscription    Subscription?
+  activityLogs    ActivityLog[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([firebaseUid])
+  @@index([email])
+  @@index([createdAt])
 }
 
 model CreditLedger {
-  id        String   @id @default(cuid())
-  userId    String
-  amount    Int
-  type      String   // DEBIT or CREDIT
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  id          String      @id @default(cuid())
+  userId      String
+  type        CreditType
+  amount      Int
+  balance     Int
+  reason      String
+  metadata    Json?
+  paymentId   String?
+  jobId       String?
+  createdAt   DateTime    @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job         Job?        @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  payment     Payment?    @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([jobId])
+  @@index([paymentId])
+  @@index([createdAt])
 }
 
-model Session {
-  token     String   @id
-  userId    String
-  expiresAt DateTime
-  user      User     @relation(fields: [userId], references: [id])
+model Job {
+  id                  String      @id @default(cuid())
+  userId              String
+  type                String
+  status              JobStatus   @default(PENDING)
+  inputData           Json?
+  resultUrl           String?
+  resultData          Json?
+  creditCost          Int         @default(1)
+  errorMessage        String?
+  productProfileId    String?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productProfile      ProductProfile? @relation(fields: [productProfileId], references: [id])
+  creditTransactions  CreditLedger[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Payment {
+  id                         String        @id @default(cuid())
+  userId                     String
+  amount                     Int
+  currency                   String        @default("INR")
+  status                     PaymentStatus @default(PENDING)
+  packageType                PackageType
+  credits                    Int
+  phonepeTransactionId       String?       @unique
+  phonepeMerchantId          String?
+  phonepeOrderId             String?       @unique
+  phonepeProviderReferenceId String?
+  phonepePaymentInstrument   String?
+  metadata                   Json?
+  callbackData               Json?
+  callbackSignature          String?
+  callbackReceivedAt         DateTime?
+  createdAt                  DateTime      @default(now())
+  updatedAt                  DateTime      @updatedAt
+
+  user                       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  creditTransactions         CreditLedger[]
+
+  @@index([userId])
+  @@index([phonepeTransactionId])
+  @@index([phonepeOrderId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ProductProfile {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  formData    Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobs        Job[]
+
+  @@index([userId])
+  @@index([isActive])
+}
+
+model ExtensionSession {
+  id          String   @id @default(cuid())
+  userId      String
+  token       String   @unique
+  expiresAt   DateTime
+  ipAddress   String?
+  userAgent   String?
+  lastUsedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+model Subscription {
+  id          String             @id @default(cuid())
+  userId      String             @unique
+  plan        String             @default("FREE")
+  status      SubscriptionStatus @default(TRIAL)
+  startDate   DateTime           @default(now())
+  endDate     DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
 }
 
 model ActivityLog {
-  id        String   @id @default(cuid())
-  eventType String
-  userId    String
-  metadata  Json?
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+enum Role {
+  FREE
+  PRO
+  ADMIN
+}
+
+enum CreditType {
+  CREDIT
+  DEBIT
+  REFUND
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  PENDING
+  INITIATED
+  PROCESSING
+  SUCCESS
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PackageType {
+  STARTER
+  GROWTH
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  EXPIRED
+  CANCELLED
 }

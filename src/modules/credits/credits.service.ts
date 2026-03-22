@@ -3,23 +3,27 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class CreditsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async deductCredit(userId: string) {
     return this.prisma.$transaction(async (tx) => {
-      const user = await tx.user.update({
-        where: { id: userId },
-        data: { credits: { decrement: 1 } }
+      const lastLedger = await tx.creditLedger.findFirst({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
       });
-      
+
+      const currentBalance = lastLedger ? lastLedger.balance : 0;
+
       await tx.creditLedger.create({
         data: {
           userId,
           amount: 1,
-          type: 'DEBIT'
+          balance: currentBalance - 1,
+          type: 'DEBIT',
+          reason: 'Extension AI Analysis'
         }
       });
-      return user;
+      return { id: userId, credits: currentBalance - 1 };
     });
   }
 }
