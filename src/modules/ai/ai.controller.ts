@@ -54,6 +54,7 @@ export class AiController {
       success: true,
       listing: {
         title: fullListing.title,
+        description: fullListing.description?.full ? fullListing.description.bullets.join('\\n') + '\\n\\n' + fullListing.description.full : fullListing.description?.bullets?.join('\\n') || fullListing.description,
         category: fullListing.category,
         hsn: fullListing.hsn || deriveHSN(fullListing.category),
         gst: fullListing.gst || deriveGST(fullListing.category),
@@ -62,6 +63,12 @@ export class AiController {
         price: fullListing.pricing?.selling_price,
         mrp: fullListing.pricing?.mrp,
         defective_price: fullListing.pricing?.defective_price,
+        length: 20, // Default fallbacks since prompt doesn't strictly generate dimension JSON
+        breadth: 15,
+        height: 5,
+        stock: 100,
+        pack_of: fullListing.attributes?.net_quantity?.replace(/\\D/g, '') || 1,
+        color: fullListing.attributes?.color,
         full_listing: fullListing
       },
       credits_remaining
