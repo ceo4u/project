@@ -49,12 +49,23 @@ export class AiController {
       return key ? gstMap[key] : 12;
     };
 
-    // Return the specific shape expected by the extension
+    // Build description string
+    let description = '';
+    if (fullListing.description?.bullets && Array.isArray(fullListing.description.bullets)) {
+      description = fullListing.description.bullets.join('\n');
+      if (fullListing.description.full) {
+        description += '\n\n' + fullListing.description.full;
+      }
+    } else if (typeof fullListing.description === 'string') {
+      description = fullListing.description;
+    }
+
+    // Return the specific shape expected by the extension popup.js
     return {
       success: true,
       listing: {
         title: fullListing.title,
-        description: fullListing.description?.full ? fullListing.description.bullets.join('\\n') + '\\n\\n' + fullListing.description.full : fullListing.description?.bullets?.join('\\n') || fullListing.description,
+        description,
         category: fullListing.category,
         hsn: fullListing.hsn || deriveHSN(fullListing.category),
         gst: fullListing.gst || deriveGST(fullListing.category),
@@ -63,16 +74,18 @@ export class AiController {
         price: fullListing.pricing?.selling_price,
         mrp: fullListing.pricing?.mrp,
         defective_price: fullListing.pricing?.defective_price,
-        length: 20, // Default fallbacks since prompt doesn't strictly generate dimension JSON
+        length: 20,
         breadth: 15,
         height: 5,
         stock: 100,
-        pack_of: fullListing.attributes?.net_quantity?.replace(/\\D/g, '') || 1,
+        pack_of: fullListing.attributes?.net_quantity?.replace(/\D/g, '') || 1,
         color: fullListing.attributes?.color,
+        keywords: fullListing.seo?.keywords || [],
+        tags: fullListing.seo?.tags || [],
+        brand: fullListing.brand || 'Generic',
         full_listing: fullListing
       },
       credits_remaining
     };
   }
 }
-
