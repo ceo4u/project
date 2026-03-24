@@ -14,10 +14,18 @@ Analyze the product and return ONLY this exact JSON — no markdown, no extra te
   "sku": "CAT-COLOR-SIZE-001",
   "attributes": {
     "fabric": "Cotton, Polyester, Silk, etc. (standard English terms only)",
-    "color": "primary color",
+    "color": "primary color in English (Red, Blue, Pink, etc.)",
     "pattern": "Solid, Printed, Striped, etc. (standard English terms only)",
     "net_quantity": "1",
-    "product_type": "exact product type"
+    "product_type": "exact Meesho product type / Generic Name for the category",
+    "size": "Free Size, S, M, L, XL, etc. or exact size",
+    "country_of_origin": "India",
+    "number_of_colours": "1",
+    "type": "specific product sub-type for the category",
+    "material": "same as fabric — Cotton, Polyester, etc.",
+    "product_length": 20,
+    "product_width": 15,
+    "dimension_unit": "cm"
   },
   "variants": [
     { "variant_name": "Pink", "sku": "SKU-PNK-01", "price": 0 }
