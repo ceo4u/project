@@ -6,15 +6,17 @@ const MEESHO_SYSTEM_PROMPT = `You are a Meesho seller growth specialist AI.
 Analyze the product and return ONLY this exact JSON — no markdown, no extra text:
 
 {
-  "title": "[Color] + [Use Case] + [Product Type] — Hinglish SEO optimized, max 100 chars",
+  "title": "[Color] + [Use Case] + [Product Type] — English ONLY SEO optimized, max 100 chars",
   "category": "Meesho taxonomy category",
+  "hsn": "numeric HSN code (e.g. 6109, 3004)",
+  "gst": "numeric GST percentage only (e.g. 5, 12, 18)",
   "brand": "Generic",
   "sku": "CAT-COLOR-SIZE-001",
   "attributes": {
-    "fabric": "realistic material guess",
+    "fabric": "Cotton, Polyester, Silk, etc. (standard English terms only)",
     "color": "primary color",
-    "pattern": "printed/plain/cartoon/etc",
-    "net_quantity": "Pack of 1",
+    "pattern": "Solid, Printed, Striped, etc. (standard English terms only)",
+    "net_quantity": "1",
     "product_type": "exact product type"
   },
   "variants": [
@@ -27,7 +29,7 @@ Analyze the product and return ONLY this exact JSON — no markdown, no extra te
     "defective_price": <basePrice * 0.5>
   },
   "shipping": {
-    "weight": "350g",
+    "weight": 350,
     "shipping_category": "Standard — under 500g = Rs.65 flat"
   },
   "description": {
@@ -38,10 +40,10 @@ Analyze the product and return ONLY this exact JSON — no markdown, no extra te
       "✔ Attractive Printed Design",
       "✔ Spacious Storage Compartment"
     ],
-    "full": "2-3 short paragraphs"
+    "full": "2-3 short paragraphs in strictly English ONLY"
   },
   "seo": {
-    "keywords": ["10 to 15 strong Hindi+English buyer intent keywords"],
+    "keywords": ["10 to 15 strong English ONLY buyer intent keywords"],
     "tags": ["short", "tags", "here"]
   },
   "combo": {
@@ -51,12 +53,31 @@ Analyze the product and return ONLY this exact JSON — no markdown, no extra te
 }
 
 RULES:
+- ALL descriptive text MUST be strictly in English ONLY. Do NOT use Hindi or Hinglish.
+- Fields like weight, hsn, and gst MUST be purely numerical (e.g. 18, 350, 6109) with no text, letters, or symbols.
 - If multiple products visible → is_combo: true, list items
 - selling_price = base_price × 2.5 to 4 (use 3x as default)
 - mrp = selling_price × 1.5 (round to nearest 9)
 - defective_price = base_price × 0.5
-- weight: bags 300-500g, clothing 200-400g, jewelry 50-150g
-- Never hallucinate specs. Be practical and sellable.`;
+- weight: bags 300-500, clothing 200-400, jewelry 50-150. ONLY output the raw number, do not include 'g'.
+- For dropdowns like fabric, pattern, use standard English exact values ONLY. Never hallucinate specs. Be practical and sellable.
+
+LANGUAGE RULES (STRICT — MUST FOLLOW):
+- title: English only — for Meesho SEO
+- description bullets: English only
+- description full: English only
+- category: English only — must be exact Meesho category name
+- color: English only — single color word (Red, Blue, Pink, etc.)
+- material/fabric: English only — use standard terms (Cotton, Polyester, Silk, etc.)
+- brand: English only
+- sku: English alphanumeric only, no spaces
+
+FIELD FORMAT RULES (STRICT — MUST FOLLOW):
+- hsn: numbers only, no letters (e.g. 6109, not "HSN6109")
+- weight: number only, no unit suffix (e.g. 350, not "350g" or "350 grams")
+- gst: number only, no % symbol (e.g. 12, not "12%")
+- price, mrp, defective_price: numbers only, no ₹ symbol
+- net_quantity: number only (e.g. 1, not "Pack of 1")`;
 
 function validateAndFix(listing: any, basePrice: number) {
   if (!listing.pricing) listing.pricing = {};
@@ -72,11 +93,30 @@ function validateAndFix(listing: any, basePrice: number) {
   listing.pricing.defective_price = Math.round(basePrice * 0.5);
   listing.pricing.base_price = basePrice;
 
-  // Fix weight
-  const weightNum = parseInt(listing.shipping?.weight);
+  // Fix weight — strip any non-numeric chars (e.g. "350g" → 350)
+  const rawWeight = String(listing.shipping?.weight || '').replace(/[^0-9]/g, '');
+  const weightNum = parseInt(rawWeight) || 0;
   if (!weightNum || weightNum < 100 || weightNum > 5000) {
-    listing.shipping.weight = "350g";
-    listing.shipping.shipping_category = "Standard — under 500g = Rs.65 flat";
+    listing.shipping.weight = 350;
+  } else {
+    listing.shipping.weight = weightNum;
+  }
+  listing.shipping.shipping_category = "Standard — under 500g = Rs.65 flat";
+
+  // Fix HSN — must be numeric only
+  if (listing.hsn) {
+    listing.hsn = String(listing.hsn).replace(/[^0-9]/g, '');
+  }
+
+  // Fix GST — must be numeric only
+  if (listing.gst) {
+    listing.gst = parseInt(String(listing.gst).replace(/[^0-9]/g, '')) || 12;
+  }
+
+  // Fix net_quantity — strip text like "Pack of 1" → "1"
+  if (listing.attributes?.net_quantity) {
+    const nq = String(listing.attributes.net_quantity).replace(/[^0-9]/g, '');
+    listing.attributes.net_quantity = nq || '1';
   }
 
   // Fix combo detection
