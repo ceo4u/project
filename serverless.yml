@@ -5,16 +5,33 @@ provider:
   name: aws
   runtime: nodejs18.x
   region: us-east-1
-  timeout: 30
+  timeout: 29
+  memorySize: 512
   environment:
     DATABASE_URL: ${env:DATABASE_URL, ''}
     GEMINI_API_KEY: ${env:GEMINI_API_KEY, ''}
 
 package:
   patterns:
+    - "!src/**"
+    - "!test/**"
+    - "!prisma/**"
+    - "!deploy_log.txt"
+    - "!tsconfig*.json"
+    - "!.eslintrc*"
+    - "!.prettierrc*"
+    - "!README.md"
+    - "!nest-cli.json"
     - "!node_modules/.prisma/client/query_engine-windows.dll.node"
     - "!node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node"
-    - "!src/**"
+    - "!node_modules/.prisma/client/libquery_engine-debian-openssl-*.so.node"
+    - "!node_modules/.prisma/client/libquery_engine-darwin*.dylib.node"
+    - "!node_modules/@prisma/engines/**"
+    - "!node_modules/prisma/**"
+    - "!node_modules/typescript/**"
+    - "!node_modules/@types/**"
+    - "!node_modules/@nestjs/schematics/**"
+    - "!node_modules/@nestjs/cli/**"
 
 functions:
   api:

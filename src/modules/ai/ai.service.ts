@@ -156,15 +156,27 @@ function validateAndFix(listing: any, basePrice: number) {
 export class AiService {
   constructor(private creditsService: CreditsService, private prisma: PrismaService) { }
 
-  async analyzeImage(base64Data: string, mimeType: string, userId: string, basePrice: number, textPrompt?: string) {
+  async analyzeImage(base64Data: string, mimeType: string, userId: string, basePrice: number, textPrompt?: string, scannedFields?: any[]) {
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
     if (!GEMINI_API_KEY) throw new InternalServerErrorException('Server missing Gemini Key');
 
-    const prompt = MEESHO_SYSTEM_PROMPT
+    let prompt = MEESHO_SYSTEM_PROMPT
       .replace('<basePrice>', basePrice.toString())
       .replace('<basePrice * 3>', (Math.round(basePrice * 3)).toString())
       .replace('<basePrice * 4>', (Math.round(basePrice * 4)).toString())
       .replace('<basePrice * 0.5>', (Math.max(1, Math.round(basePrice * 0.5))).toString());
+
+    if (scannedFields && scannedFields.length > 0) {
+      const dropdowns = scannedFields.filter(f => f.type === 'dropdown' && f.options && f.options.length > 0);
+      if (dropdowns.length > 0) {
+        prompt += `\n\n=== STRICT DROPDOWN CONSTRAINTS ===\n`;
+        prompt += `You MUST ONLY select values from the provided dropdown options below. DO NOT generate new values for these fields. If no exact match is found, select the closest matching option. If still unsure, select the FIRST option from the dropdown.\n\n`;
+        prompt += `DROPDOWN OPTIONS:\n`;
+        for (const drop of dropdowns) {
+          prompt += `${drop.label}: ${JSON.stringify(drop.options)}\n`;
+        }
+      }
+    }
 
     let parts: any[] = [];
     if (base64Data) {
@@ -178,7 +190,7 @@ export class AiService {
       throw new InternalServerErrorException('No image or prompt provided');
     }
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: [{ parts }] })

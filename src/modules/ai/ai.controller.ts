@@ -25,7 +25,8 @@ export class AiController {
       body.mimeType || 'image/jpeg',
       req.user.id,
       body.basePrice || 199,
-      body.textPrompt
+      body.textPrompt,
+      body.scannedFields
     );
 
     // HSN/GST derivation logic

@@ -1,0 +1,36 @@
+(node:49744) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+Deploying ecomrtx-ai-backend to stage dev (us-east-1)
+
+Excluding development dependencies for service package
+Warning: Function api has timeout of 60 seconds, however, it's attached to API Gateway so it's automatically limited to 30 seconds.
+Warning: Function api has timeout of 60 seconds, however, it's attached to API Gateway so it's automatically limited to 30 seconds.
+Uploading CloudFormation file to S3
+Uploading State file to S3
+Uploading service ecomrtx-ai-backend.zip file to S3 (126.73 MB)
+Creating new change set
+Waiting for new change set to be created
+Change Set did not reach desired state, retrying
+Executing created change set
+  UPDATE_IN_PROGRESS - AWS::CloudFormation::Stack - ecomrtx-ai-backend-dev
+  UPDATE_IN_PROGRESS - AWS::Lambda::Function - ApiLambdaFunction
+  UPDATE_FAILED - AWS::Lambda::Function - ApiLambdaFunction
+  UPDATE_ROLLBACK_IN_PROGRESS - AWS::CloudFormation::Stack - ecomrtx-ai-backend-dev
+  UPDATE_IN_PROGRESS - AWS::Lambda::Function - ApiLambdaFunction
+  UPDATE_COMPLETE - AWS::Lambda::Function - ApiLambdaFunction
+  UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS - AWS::CloudFormation::Stack - ecomrtx-ai-backend-dev
+  UPDATE_ROLLBACK_COMPLETE - AWS::CloudFormation::Stack - ecomrtx-ai-backend-dev
+
+├ù Stack ecomrtx-ai-backend-dev failed to deploy (180s)
+Environment: win32, node 22.12.0, framework 3.40.0 (local), plugin 7.2.3, SDK 4.5.1
+Credentials: Local, "default" profile
+Docs:        docs.serverless.com
+Support:     forum.serverless.com
+Bugs:        github.com/serverless/serverless/issues
+
+Error:
+UPDATE_FAILED: ApiLambdaFunction (AWS::Lambda::Function)
+Resource handler returned message: "Unzipped size must be smaller than 262144000 bytes (Service: Lambda, Status Code: 400, Request ID: 227c6590-5a53-430a-a663-01057ebc3b3b) (SDK Attempt Count: 1)" (RequestToken: 9d2d99e8-2510-b1cb-ab00-148d04999663, HandlerErrorCode: InvalidRequest)
+
+View the full error: https://us-east-1.console.aws.amazon.com/cloudformation/home?region=us-east-1#/stack/detail?stackId=arn%3Aaws%3Acloudformation%3Aus-east-1%3A367088349588%3Astack%2Fecomrtx-ai-backend-dev%2F5aba0410-2569-11f1-b439-0e26ad317b3f

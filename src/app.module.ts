@@ -9,8 +9,8 @@ import { CreditsModule } from './modules/credits/credits.module';
 @Module({
   imports: [
     ThrottlerModule.forRoot([{
-        ttl: 60000,
-        limit: 5,
+      ttl: 60000,
+      limit: 100,
     }]),
     PrismaModule,
     AuthModule,
@@ -24,4 +24,4 @@ import { CreditsModule } from './modules/credits/credits.module';
     }
   ]
 })
-export class AppModule {}
+export class AppModule { }

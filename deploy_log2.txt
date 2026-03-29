@@ -1,0 +1,43 @@
+(node:40392) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+Deploying ecomrtx-ai-backend to stage dev (us-east-1)
+
+Excluding development dependencies for service package
+Uploading CloudFormation file to S3
+Uploading State file to S3
+Uploading service ecomrtx-ai-backend.zip file to S3 (53.49 MB)
+Creating new change set
+Waiting for new change set to be created
+Change Set did not reach desired state, retrying
+Executing created change set
+  UPDATE_IN_PROGRESS - AWS::CloudFormation::Stack - ecomrtx-ai-backend-dev
+  UPDATE_IN_PROGRESS - AWS::Lambda::Function - ApiLambdaFunction
+  UPDATE_COMPLETE - AWS::Lambda::Function - ApiLambdaFunction
+  CREATE_IN_PROGRESS - AWS::Lambda::Version - ApiLambdaVersionwCbEyIQhAJtnAIGCCXsCjnAITU2IGMdxJbPu6nz5vY
+  CREATE_IN_PROGRESS - AWS::Lambda::Version - ApiLambdaVersionwCbEyIQhAJtnAIGCCXsCjnAITU2IGMdxJbPu6nz5vY
+  CREATE_COMPLETE - AWS::Lambda::Version - ApiLambdaVersionwCbEyIQhAJtnAIGCCXsCjnAITU2IGMdxJbPu6nz5vY
+  CREATE_IN_PROGRESS - AWS::ApiGateway::Deployment - ApiGatewayDeployment1774427441836
+  CREATE_IN_PROGRESS - AWS::ApiGateway::Deployment - ApiGatewayDeployment1774427441836
+  CREATE_COMPLETE - AWS::ApiGateway::Deployment - ApiGatewayDeployment1774427441836
+  UPDATE_COMPLETE_CLEANUP_IN_PROGRESS - AWS::CloudFormation::Stack - ecomrtx-ai-backend-dev
+  DELETE_IN_PROGRESS - AWS::ApiGateway::Deployment - ApiGatewayDeployment1774250244563
+  DELETE_SKIPPED - AWS::Lambda::Version - ApiLambdaVersiontHs1ZO8IGfIMdS84Le01lYoMuW9s7hwEA648AoWiXIc
+  DELETE_COMPLETE - AWS::ApiGateway::Deployment - ApiGatewayDeployment1774250244563
+  UPDATE_COMPLETE - AWS::CloudFormation::Stack - ecomrtx-ai-backend-dev
+Removing old service artifacts from S3
+
+Γ£ö Service deployed to stack ecomrtx-ai-backend-dev (126s)
+
+endpoints:
+  ANY - https://b73y0nqwda.execute-api.us-east-1.amazonaws.com/dev/
+  ANY - https://b73y0nqwda.execute-api.us-east-1.amazonaws.com/dev/{proxy+}
+functions:
+  api: ecomrtx-ai-backend-dev-api (53 MB)
+
+Stack Outputs:
+  ApiLambdaFunctionQualifiedArn: arn:aws:lambda:us-east-1:367088349588:function:ecomrtx-ai-backend-dev-api:12
+  ServiceEndpoint: https://b73y0nqwda.execute-api.us-east-1.amazonaws.com/dev
+  ServerlessDeploymentBucketName: ecomrtx-ai-backend-dev-serverlessdeploymentbucket-kwl8vqbsg7nb
+
+Need a faster logging experience than CloudWatch? Try our Dev Mode in Console: run "serverless dev"

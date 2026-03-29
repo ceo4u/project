@@ -1,0 +1,14 @@
+(node:7596) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+Deploying ecomrtx-ai-backend to stage dev (us-east-1)
+
+Γ£ö Service deployed to stack ecomrtx-ai-backend-dev (143s)
+
+endpoints:
+  ANY - https://b73y0nqwda.execute-api.us-east-1.amazonaws.com/dev/
+  ANY - https://b73y0nqwda.execute-api.us-east-1.amazonaws.com/dev/{proxy+}
+functions:
+  api: ecomrtx-ai-backend-dev-api (53 MB)
+
+Need a faster logging experience than CloudWatch? Try our Dev Mode in Console: run "serverless dev"
